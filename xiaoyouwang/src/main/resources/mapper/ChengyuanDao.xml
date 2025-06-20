@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dao.ChengyuanDao">
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        a.id as id
+        ,a.xiaoyoufenhui_id as xiaoyoufenhuiId
+        ,a.chengyuan_name as chengyuanName
+        ,a.chengyuan_photo as chengyuanPhoto
+        ,a.sex_types as sexTypes
+        ,a.chengyuan_phone as chengyuanPhone
+        ,a.create_time as createTime
+    </sql>
+    <select id="selectListView" parameterType="map" resultType="com.entity.view.ChengyuanView" >
+        SELECT
+        <include refid="Base_Column_List" />
+
+--         级联表的字段
+        ,xiaoyoufenhui.xiaoyoufenhui_name as xiaoyoufenhuiName
+        ,xiaoyoufenhui.xiaoyoufenhui_types as xiaoyoufenhuiTypes
+        ,xiaoyoufenhui.xiaoyoufenhui_photo as xiaoyoufenhuiPhoto
+        ,xiaoyoufenhui.xiaoyoufenhui_fuzheren as xiaoyoufenhuiFuzheren
+        ,xiaoyoufenhui.xiaoyoufenhui_address as xiaoyoufenhuiAddress
+        ,xiaoyoufenhui.xiaoyoufenhui_content as xiaoyoufenhuiContent
+
+        FROM chengyuan  a
+        left JOIN xiaoyoufenhui xiaoyoufenhui ON a.xiaoyoufenhui_id = xiaoyoufenhui.id
+
+        <where>
+            <if test="params.ids != null">
+                and a.id in
+                <foreach item="item" index="index" collection="params.ids" open="(" separator="," close=")">
+                #{item}
+                </foreach>
+            </if>
+            <if test="params.xiaoyoufenhuiId != null and params.xiaoyoufenhuiId != ''">
+                and (
+                    a.xiaoyoufenhui_id = #{params.xiaoyoufenhuiId}
+                )
+            </if>
+            <if test=" params.chengyuanName != '' and params.chengyuanName != null and params.chengyuanName != 'null' ">
+                and a.chengyuan_name like CONCAT('%',#{params.chengyuanName},'%')
+            </if>
+            <if test=" params.sexTypes != '' and params.sexTypes != null and params.sexTypes != 'null' ">
+                and a.sex_types like CONCAT('%',#{params.sexTypes},'%')
+            </if>
+            <if test=" params.chengyuanPhone != '' and params.chengyuanPhone != null and params.chengyuanPhone != 'null' ">
+                and a.chengyuan_phone like CONCAT('%',#{params.chengyuanPhone},'%')
+            </if>
+
+                <!-- 判断校友分会的id不为空 -->
+            <if test=" params.xiaoyoufenhuiIdNotNull != '' and params.xiaoyoufenhuiIdNotNull != null and params.xiaoyoufenhuiIdNotNull != 'null' ">
+                and a.xiaoyoufenhui_id IS NOT NULL
+            </if>
+            <if test=" params.xiaoyoufenhuiName != '' and params.xiaoyoufenhuiName != null and params.xiaoyoufenhuiName != 'null' ">
+                and xiaoyoufenhui.xiaoyoufenhui_name like CONCAT('%',#{params.xiaoyoufenhuiName},'%')
+            </if>
+            <if test="params.xiaoyoufenhuiTypes != null  and params.xiaoyoufenhuiTypes != ''">
+                and xiaoyoufenhui.xiaoyoufenhui_types = #{params.xiaoyoufenhuiTypes}
+            </if>
+
+            <if test=" params.xiaoyoufenhuiFuzheren != '' and params.xiaoyoufenhuiFuzheren != null and params.xiaoyoufenhuiFuzheren != 'null' ">
+                and xiaoyoufenhui.xiaoyoufenhui_fuzheren like CONCAT('%',#{params.xiaoyoufenhuiFuzheren},'%')
+            </if>
+            <if test=" params.xiaoyoufenhuiAddress != '' and params.xiaoyoufenhuiAddress != null and params.xiaoyoufenhuiAddress != 'null' ">
+                and xiaoyoufenhui.xiaoyoufenhui_address like CONCAT('%',#{params.xiaoyoufenhuiAddress},'%')
+            </if>
+            <if test=" params.xiaoyoufenhuiContent != '' and params.xiaoyoufenhuiContent != null and params.xiaoyoufenhuiContent != 'null' ">
+                and xiaoyoufenhui.xiaoyoufenhui_content like CONCAT('%',#{params.xiaoyoufenhuiContent},'%')
+            </if>
+        </where>
+
+        order by a.${params.orderBy} desc 
+    </select>
+
+</mapper>
